@@ -11,6 +11,6 @@ pub fn change_directory(input:&str){
         &env::var("HOME").unwrap()
     };
     if let Err(e) = env::set_current_dir(Path::new(path)) {
-        eprintln!("cd failed: {}", e);
+        println!("cd failed: {}", e);
     }
 }
