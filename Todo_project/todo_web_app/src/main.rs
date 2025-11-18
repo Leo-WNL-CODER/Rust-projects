@@ -7,10 +7,13 @@ mod todo_fn;
 
 use tower_http::cors::{CorsLayer, Any};
 
+use dotenvy;
+
 
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
     let cors = CorsLayer::new()
     .allow_origin(Any)
     .allow_methods(Any)
@@ -20,6 +23,7 @@ async fn main() {
         todo:Arc::new(Mutex::new(Vec::new())),
         next_id:Arc::new(Mutex::new(1))
         };
+    
     let app:Router=Router::new()
     .route("/", get(r_todo))
     .route("/addTodo", post(add_todo))
