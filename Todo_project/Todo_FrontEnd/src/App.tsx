@@ -5,11 +5,12 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [description, setDescription] = useState("");
   const [refresh, setRefresh] = useState(false);
+  const [version, setVersion] = useState("v1");
 
   useEffect(() => {
     async function fetchTodos() {
       try {
-        const res = await axios.get("http://localhost:3000/");
+        const res = await axios.get(`http://localhost:3000/${version}`);
         setTodos(res.data);
       } catch (err) {
         console.error("Error fetching todos:", err);
@@ -18,12 +19,12 @@ function App() {
       }
     }
     fetchTodos();
-  }, [refresh]);
+  }, [refresh, version]);
 
   const handleAddTodo = async () => {
     if (!description.trim()) return;
     try {
-      await axios.post("http://localhost:3000/addTodo", {
+      await axios.post(`http://localhost:3000/${version}/addTodo`, {
         description,
       });
       setDescription("");
@@ -35,7 +36,7 @@ function App() {
 
   const handleDelete = async (id:number) => {
     try {
-      await axios.delete(`http://localhost:3000/deleteTodo/${id}`);
+      await axios.delete(`http://localhost:3000/${version}/deleteTodo/${id}`);
       setRefresh(true);
     } catch (err) {
       console.error("Error deleting todo:", err);
@@ -44,7 +45,7 @@ function App() {
 
   const handleMarkDone = async (id:number) => {
     try {
-      await axios.put(`http://localhost:3000/markDone/${id}`);
+      await axios.put(`http://localhost:3000/${version}/markDone/${id}`);
       setRefresh(true);
     } catch (err) {
       console.error("Error marking todo done:", err);
@@ -60,6 +61,30 @@ function App() {
             My Todo List
           </h1>
           <p className="text-gray-600">Organize your tasks efficiently</p>
+          
+          {/* Version Switcher */}
+          <div className="mt-6 inline-flex bg-white rounded-xl shadow-md p-1">
+            <button
+              onClick={() => setVersion("v1")}
+              className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${
+                version === "v1"
+                  ? "bg-indigo-500 text-white shadow-md"
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+            >
+              V1 (Memory)
+            </button>
+            <button
+              onClick={() => setVersion("v2")}
+              className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${
+                version === "v2"
+                  ? "bg-indigo-500 text-white shadow-md"
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+            >
+              V2 (Database)
+            </button>
+          </div>
         </div>
 
         {/* Add Todo Section */}
