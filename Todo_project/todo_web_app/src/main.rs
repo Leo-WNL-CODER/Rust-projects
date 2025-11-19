@@ -1,35 +1,51 @@
-use std::sync::{Arc, Mutex};
+use std::{ sync::{Arc, Mutex}};
+mod db;
+use axum::{ Router,routing::{delete, get, post, put}};
 
-use axum::{Json, Router, extract::State, routing::{delete, get, post, put}};
+use crate::{todo_fn::{create_todo::{add_todo, add_todo_v2}, 
+delete_todo::{del_todo, del_todo_v2}, mark_todo::{mark, mark_v2}, 
+read_todo::{r_todo, r_todo_v2}, todo_struct::{ Todos}}};
 
-use crate::todo_fn::{create_todo::add_todo, delete_todo::del_todo, mark_todo::{ mark}, todo_struct::{Task, Todos}};
+
 mod todo_fn;
 
 use tower_http::cors::{CorsLayer, Any};
 
-use dotenvy;
 
 
 
 #[tokio::main]
 async fn main() {
-    dotenvy::dotenv().ok();
+    
     let cors = CorsLayer::new()
     .allow_origin(Any)
     .allow_methods(Any)
     .allow_headers(Any);
-
+ 
     let todo_list=Todos{
         todo:Arc::new(Mutex::new(Vec::new())),
         next_id:Arc::new(Mutex::new(1))
         };
     
     let app:Router=Router::new()
-    .route("/", get(r_todo))
-    .route("/addTodo", post(add_todo))
-    .route("/deleteTodo/{id}",delete(del_todo))
-    .route("/markDone/{id}", put(mark))
+    .route("/v2", get(r_todo_v2))
+
+    .route("/v2/addTodo", post(add_todo_v2))
+
+    .route("/v2/deleteTodo/{id}",delete(del_todo_v2))
+
+    .route("/v2/markDone/{id}", put(mark_v2))
+
+    .route("/v1", get(r_todo))
+
+    .route("/v1/addTodo", post(add_todo))
+
+    .route("/v1/deleteTodo/{id}",delete(del_todo))
+
+    .route("/v1/markDone/{id}", put(mark))
+
     .with_state(todo_list)
+
     .layer(cors);
     
     
@@ -42,7 +58,3 @@ async fn main() {
 
 }
 
-async fn r_todo(State(todo_list):State<Todos>,)->Json<Vec<Task>>{
-    let tl=todo_list.todo.lock().unwrap();
-   Json(tl.clone())
-}

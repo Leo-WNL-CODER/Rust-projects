@@ -1,9 +1,10 @@
 use std::sync::{Arc, Mutex};
 
 use serde::{Deserialize, Serialize};
+use sqlx::prelude::FromRow;
 
 
-#[derive(Debug,Deserialize,Serialize,Clone)]
+#[derive(Debug,Deserialize,Serialize,Clone,FromRow)]
 pub struct Task{
     pub id:u32,
     pub description:String,

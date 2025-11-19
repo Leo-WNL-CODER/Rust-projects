@@ -1,6 +1,6 @@
 use axum::{ Json, extract::{State, rejection::{ JsonRejection}}, http::StatusCode, response::{IntoResponse}};
 
-use crate::todo_fn::todo_struct::{PayloadRequest, Task, Todos};
+use crate::{db::db_conn::db_client, todo_fn::todo_struct::{PayloadRequest, Task, Todos}};
 
 
 
@@ -31,4 +31,20 @@ payload:Result<Json<PayloadRequest>,JsonRejection>)
         }
     };
 
+}
+
+pub async fn add_todo_v2(payload:Result<Json<PayloadRequest>,JsonRejection>)->impl IntoResponse{
+    let pool=db_client().await;
+    match payload {
+        Ok(p)=>{
+            let _=sqlx::query!(r#"
+            Insert into todos (description) values ($1)
+            "#,p.description).execute   (&pool).await.expect("failed to insert");
+            ("Added").into_response()
+        },
+        Err(_)=>{
+            ("Error").into_response()
+        }
+    }
+    
 }
